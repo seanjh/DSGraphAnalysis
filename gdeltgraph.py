@@ -16,8 +16,10 @@ COOPERATE_REGEXP = re.compile(r"^05")
 DISAPPROVE_REGEXP = re.compile(r"^11")
 
 
-GOV_ACTOR_KEY = "Actor1Code"
-BIZ_ACTOR_KEY = "Actor2Code"
+# GOV_ACTOR_KEY = "Actor1Code"
+# BIZ_ACTOR_KEY = "Actor2Code"
+GOV_ACTOR_KEY = "Actor1Name"
+BIZ_ACTOR_KEY = "Actor2Name"
 GOV_ACTOR_TYPE = "GOV"
 BIZ_ACTOR_TYPE = "BIZ"
 
@@ -120,23 +122,27 @@ def draw_graph(graph, name, gov_out_degree=1):
         graph.out_degree(node) > gov_out_degree
     ]
 
-    biz_nodes = [
-        node for (node, data) in graph.nodes(data=True)
-        if data['type'] == BIZ_ACTOR_TYPE
-    ]
+    print("Filtered %s --\n\tGov Nodes: %d" %
+          (name, len(gov_nodes)))
 
-    all_edges = (
-        graph.edges(nbunch=gov_nodes, data=True) +
-        graph.edges(nbunch=biz_nodes, data=True)
-    )
+    biz_nodes = []
+    for node in gov_nodes:
+        biz_nodes += graph.successors(node)
+
+
+    print("Filtered %s --\n\tBiz Nodes: %d" %
+          (name, len(biz_nodes)))
+
+    all_edges = graph.edges(nbunch=gov_nodes, data=True)
 
     edge_pos = [(u, v) for (u, v, d) in all_edges if d['weight'] >= 0.0]
     edge_neg = [(u, v) for (u, v, d) in all_edges if d['weight'] < 0.0]
 
-    pos = graphviz_layout(graph, prog="twopi", root=0)
+    pos = nx.spring_layout(graph, iterations=1000)
+    # pos = graphviz_layout(graph, prog="twopi")
 
     nx.draw_networkx_nodes(graph, pos, nodelist=gov_nodes, node_color='m',
-                           cmap='hot', node_size=10)
+                           node_size=10)
     nx.draw_networkx_nodes(graph, pos, nodelist=biz_nodes, node_color='c',
                            node_size=10)
 
@@ -146,6 +152,8 @@ def draw_graph(graph, name, gov_out_degree=1):
                            alpha=0.5, edge_color='g', arrows=False)
 
     # labels
+    labels = {node: node for node in gov_nodes}
+    nx.draw_networkx_labels(graph, pos, labels=labels, font_size=5)
     # nx.draw_networkx_labels(graph, pos, node_labels(graph),
     #                         font_size=5, font_family='sans-serif')
 
