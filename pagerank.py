@@ -175,7 +175,22 @@ def main():
 
     max1 = max(pagerank1.values())
 
+    key_list1 = pagerank1.keys()
+
+    key1 = ''
+    key2 = ''
+    for key in key_list1:
+        if pagerank1[key] == max1:
+            key1 = key
+
+
     max2 = max(pagerank2.values())
+
+    key_list2 = pagerank2.keys()
+
+    for key in key_list2:
+        if pagerank2[key] == max2:
+            key2 = key
 
     f1 = open('disapprove_graph_page_rank.csv', 'w')
 
@@ -193,8 +208,8 @@ def main():
 
 
 
-    print("Maximum Page rank for disapprove graph is: %s" % max1)
-    print("Maximum Page rank for cooperate graph is:  %s" % max2)
+    print("Maximum Page rank for disapprove graph is: %s" % key1 +" " + str(max1))
+    print("Maximum Page rank for cooperate graph is:  %s" % key2 +" " + str(max2))
 
     max_out_disagree = find_out_degree_max(disapprove)
     print("Most disapproving government with business: %s" % max_out_disagree)
