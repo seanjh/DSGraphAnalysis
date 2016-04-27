@@ -1,6 +1,6 @@
 # Select subreddit group names
 select 
-subreddit,subreddit_id
+subreddit,subreddit_id,count(distinct(author))
 from [fh-bigquery:reddit_comments.2015_05]
 WHERE subreddit_id IN ('t5_2rmfx','t5_2ul7u','t5_2u3ta','t5_2r05i','t5_2qka0','t5_2yuej','t5_2qioo','t5_2qhqb','t5_2qh53','t5_2stl8')
 group by subreddit,subreddit_id
