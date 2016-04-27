@@ -173,11 +173,11 @@ def main():
     pagerank1 = nx.pagerank_numpy(disapproveGraph, alpha = 0.90)
     pagerank2 = nx.pagerank_numpy(cooperateGraph, alpha = 0.90)
 
-    f1 = open('disapprove_graph_page_rank', 'w')
+    f1 = open('disapprove_graph_page_rank.json', 'w')
 
     f1.write(str(pagerank1))
 
-    f2 = open('cooperate_graph_page_rank', 'w')
+    f2 = open('cooperate_graph_page_rank.json', 'w')
 
     f2.write(str(pagerank2))
 
