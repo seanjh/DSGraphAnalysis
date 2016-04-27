@@ -2,11 +2,8 @@
 
 import csv
 import re
-import pygraphviz
 import networkx as nx
 import matplotlib.pyplot as plt
-
-from networkx.drawing.nx_agraph import graphviz_layout
 from data.events import CooperateEventCodes, DisapproveEventCodes
 
 
@@ -129,9 +126,7 @@ def draw_graph(graph, name, gov_out_degree=1):
     for node in gov_nodes:
         biz_nodes += graph.successors(node)
 
-
-    print("Filtered %s --\n\tBiz Nodes: %d" %
-          (name, len(biz_nodes)))
+    print("\tBiz Nodes: %d" % (len(biz_nodes)))
 
     all_edges = graph.edges(nbunch=gov_nodes, data=True)
 
@@ -139,7 +134,6 @@ def draw_graph(graph, name, gov_out_degree=1):
     edge_neg = [(u, v) for (u, v, d) in all_edges if d['weight'] < 0.0]
 
     pos = nx.spring_layout(graph, iterations=1000)
-    # pos = graphviz_layout(graph, prog="twopi")
 
     nx.draw_networkx_nodes(graph, pos, nodelist=gov_nodes, node_color='m',
                            node_size=10)
@@ -154,8 +148,6 @@ def draw_graph(graph, name, gov_out_degree=1):
     # labels
     labels = {node: node for node in gov_nodes}
     nx.draw_networkx_labels(graph, pos, labels=labels, font_size=5)
-    # nx.draw_networkx_labels(graph, pos, node_labels(graph),
-    #                         font_size=5, font_family='sans-serif')
 
     plt.axis('off')
     plt.savefig("results/%s_weighted_graph.pdf" % (name))
