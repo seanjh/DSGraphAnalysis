@@ -173,6 +173,10 @@ def main():
     pagerank1 = nx.pagerank_numpy(disapproveGraph, alpha = 0.90)
     pagerank2 = nx.pagerank_numpy(cooperateGraph, alpha = 0.90)
 
+    max1 = max(pagerank1.values())
+
+    max2 = max(pagerank2.values())
+
     f1 = open('disapprove_graph_page_rank.csv', 'w')
 
     pg1_str = str(pagerank1)
@@ -188,8 +192,9 @@ def main():
         f2.write(line)
 
 
-    # print("Page rank for disapprove graph is: %s" % pagerank1)
-    # print("Page rank for cooperate graph is:  %s" % pagerank2)
+
+    print("Maximum Page rank for disapprove graph is: %s" % max1)
+    print("Maximum Page rank for cooperate graph is:  %s" % max2)
 
     max_out_disagree = find_out_degree_max(disapprove)
     print("Most disapproving government with business: %s" % max_out_disagree)
