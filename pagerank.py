@@ -173,14 +173,14 @@ def main():
     pagerank1 = nx.pagerank_numpy(disapproveGraph, alpha = 0.90)
     pagerank2 = nx.pagerank_numpy(cooperateGraph, alpha = 0.90)
 
-    f1 = open('disapprove_graph_page_rank.json', 'w')
+    f1 = open('disapprove_graph_page_rank.csv', 'w')
 
     pg1_str = str(pagerank1)
 
     for line in pg1_str:
         f1.write(line)
 
-    f2 = open('cooperate_graph_page_rank.json', 'w')
+    f2 = open('cooperate_graph_page_rank.csv', 'w')
 
     pg2_str = str(pagerank2)
 
