@@ -175,11 +175,18 @@ def main():
 
     f1 = open('disapprove_graph_page_rank.json', 'w')
 
-    f1.write(str(pagerank1))
+    pg1_str = str(pagerank1)
+
+    for line in pg1_str:
+        f1.write(line)
 
     f2 = open('cooperate_graph_page_rank.json', 'w')
 
-    f2.write(str(pagerank2))
+    pg2_str = str(pagerank2)
+
+    for line in pg2_str:
+        f2.write(line)
+
 
     # print("Page rank for disapprove graph is: %s" % pagerank1)
     # print("Page rank for cooperate graph is:  %s" % pagerank2)
