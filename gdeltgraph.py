@@ -3,7 +3,6 @@
 import csv
 import re
 import networkx as nx
-import matplotlib.pyplot as plt
 from data.events import CooperateEventCodes, DisapproveEventCodes
 
 
@@ -113,6 +112,8 @@ GRAPH_SETTINGS = {
 
 
 def draw_graph(graph, name, gov_out_degree=1):
+    import matplotlib.pyplot as plt
+
     gov_nodes = [
         node for (node, data) in graph.nodes(data=True)
         if data['type'] == GOV_ACTOR_TYPE and
