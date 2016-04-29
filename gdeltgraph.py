@@ -10,10 +10,6 @@ CSV_FILE = 'data/denounce-praise-2.csv'
 
 COOPERATE_REGEXP = re.compile(r"^05")
 DISAPPROVE_REGEXP = re.compile(r"^11")
-
-
-# GOV_ACTOR_KEY = "Actor1Code"
-# BIZ_ACTOR_KEY = "Actor2Code"
 GOV_ACTOR_KEY = "Actor1Name"
 BIZ_ACTOR_KEY = "Actor2Name"
 GOV_ACTOR_TYPE = "GOV"
@@ -59,6 +55,7 @@ def integrate_row(graph, event, event_code):
     gov_actor = event.get(GOV_ACTOR_KEY).strip()
     biz_actor = event.get(BIZ_ACTOR_KEY).strip()
     tone = float(event.get("consolidatedAvgTone"))
+    eventCount = int(event.get("eventCount"))
 
     gov_attrs = get_gov_attrs(event)
     gov_attrs['type'] = GOV_ACTOR_TYPE
@@ -66,7 +63,13 @@ def integrate_row(graph, event, event_code):
     biz_attrs = get_biz_attrs(event)
     biz_attrs['type'] = BIZ_ACTOR_TYPE
     biz_node = graph.add_node(biz_actor, **biz_attrs)
-    graph.add_edge(gov_actor, biz_actor, weight=tone, event_code=event_code)
+    graph.add_edge(gov_actor, biz_actor, tone=tone,
+                   event_code=event_code)
+
+    # Add the weight
+    if not graph[gov_actor][biz_actor].get("weight"):
+        graph[gov_actor][biz_actor]["weight"] = 0
+    graph[gov_actor][biz_actor]["weight"] += eventCount
 
 
 def build_graph(events_iter):
@@ -105,10 +108,18 @@ find_in_degree_max = find_max_degree("in")
 
 
 GRAPH_SETTINGS = {
-    "node_size": 10,
-    "width": 0.1,
+    # "dim": 10,
+    "k": 0.01,
+    "iterations": 100
+}
+EDGE_SETTINGS = {
+    "alpha": 0.5,
     "arrows": False
 }
+
+
+def scale_weight(val, min_val, max_val):
+    return float(val - min_val) / (max_val - min_val)
 
 
 def draw_graph(graph, name, gov_out_degree=1):
@@ -129,22 +140,43 @@ def draw_graph(graph, name, gov_out_degree=1):
 
     print("\tBiz Nodes: %d" % (len(biz_nodes)))
 
-    all_edges = graph.edges(nbunch=gov_nodes, data=True)
+    # pos = nx.spring_layout(graph, **GRAPH_SETTINGS)
+    pos = nx.fruchterman_reingold_layout(graph, **GRAPH_SETTINGS)
 
-    edge_pos = [(u, v) for (u, v, d) in all_edges if d['weight'] >= 0.0]
-    edge_neg = [(u, v) for (u, v, d) in all_edges if d['weight'] < 0.0]
-
-    pos = nx.spring_layout(graph, iterations=1000)
-
+    # Size gov nodes by out degree
+    out_degrees = graph.out_degree(nbunch=gov_nodes)
     nx.draw_networkx_nodes(graph, pos, nodelist=gov_nodes, node_color='m',
-                           node_size=10)
-    nx.draw_networkx_nodes(graph, pos, nodelist=biz_nodes, node_color='c',
-                           node_size=10)
+                           node_size=[val for val in out_degrees.values()])
 
-    nx.draw_networkx_edges(graph, pos, edgelist=edge_pos, width=0.1,
-                           alpha=0.5, edge_color='b', arrows=False)
-    nx.draw_networkx_edges(graph, pos, edgelist=edge_neg, width=0.1,
-                           alpha=0.5, edge_color='g', arrows=False)
+    # Size biz nodes by in degree
+    in_degrees = graph.in_degree(nbunch=biz_nodes)
+    nx.draw_networkx_nodes(graph, pos, nodelist=biz_nodes, node_color='c',
+                           node_size=[val for val in in_degrees.values()])
+
+    # Filter to only edges connected to gov nodes
+    all_edges = graph.edges(nbunch=gov_nodes, data=True)
+    # Separate the edges with negative and positive tone (stored as weight)
+    edges_positive = [(u, v, d) for (u, v, d) in all_edges if d['tone'] >= 0.0]
+    positive_weights = [d["weight"] for (u, v, d) in edges_positive]
+    pos_min = min(positive_weights)
+    pos_max = max(positive_weights)
+    edges_positive_weights = [scale_weight(d["weight"], pos_min, pos_max) * 2
+                              for (u, v, d) in edges_positive]
+
+    edges_negative = [(u, v, d) for (u, v, d) in all_edges if d['tone'] < 0.0]
+
+    negative_weights = [d["weight"] for (u, v, d) in edges_negative]
+    neg_min = min(negative_weights)
+    neg_max = max(negative_weights)
+    edges_negative_weights = [scale_weight(d["weight"], neg_min, neg_max) * 2
+                              for (u, v, d) in edges_negative]
+
+    # Draw positive tone edges in blue
+    nx.draw_networkx_edges(graph, pos, edgelist=edges_positive, edge_color='b',
+                           width=edges_positive_weights, **EDGE_SETTINGS)
+    # Draw negative tone edges in green
+    nx.draw_networkx_edges(graph, pos, edgelist=edges_negative, edge_color='g',
+                           width=edges_negative_weights, **EDGE_SETTINGS)
 
     # labels
     labels = {node: node for node in gov_nodes}
