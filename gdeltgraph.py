@@ -6,7 +6,7 @@ import networkx as nx
 from data.events import CooperateEventCodes, DisapproveEventCodes
 
 
-CSV_FILE = 'data/denounce-praise-2.csv'
+CSV_FILE = 'data/denounce_praise.csv'
 
 COOPERATE_REGEXP = re.compile(r"^05")
 DISAPPROVE_REGEXP = re.compile(r"^11")
@@ -108,7 +108,6 @@ find_in_degree_max = find_max_degree("in")
 
 
 GRAPH_SETTINGS = {
-    # "dim": 10,
     "k": 0.01,
     "iterations": 100
 }
